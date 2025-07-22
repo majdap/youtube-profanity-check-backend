@@ -21,7 +21,12 @@ import (
 type TranscriptResponse struct {
 	VideoID   string `json:"video_id"`
 	Profanity bool   `json:"profanity"`
-	Error     string `json:"error,omitempty"`
+	Error     string `json:"-"` // Omit from JSON responses
+}
+
+// ErrorResponse structure for API errors
+type ErrorResponse struct {
+	Error string `json:"error"`
 }
 
 // Global worker pool to manage concurrent requests
@@ -96,7 +101,7 @@ func worker(jobs <-chan Job) {
 				response.Profanity = containsProfanity(formattedText)
 			}
 		} else {
-			response.Error = "No transcripts found"
+			response.Error = "no transcripts found"
 		}
 
 		job.Response <- response
@@ -134,7 +139,19 @@ func getTranscriptHandler(w http.ResponseWriter, r *http.Request) {
 	// Wait for response
 	response := <-respChan
 
+	if response.Error != "" {
+		w.Header().Set("Content-Type", "application/json")
+		if strings.Contains(strings.ToLower(response.Error), "no transcripts found") {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		json.NewEncoder(w).Encode(ErrorResponse{Error: response.Error})
+		return
+	}
+
 	// Return response
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
