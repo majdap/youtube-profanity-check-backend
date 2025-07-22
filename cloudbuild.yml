@@ -5,11 +5,11 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'youtube-profanity-check'
+      - 'youtube-profanity-check-backend'
       - '--source'
       - '.'
       - '--region'
-      - 'us-central1'
+      - 'europe-west1'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
