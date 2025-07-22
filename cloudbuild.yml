@@ -1,0 +1,15 @@
+steps:
+  # Deploy to Cloud Run from source
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'youtube-profanity-check'
+      - '--source'
+      - '.'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
